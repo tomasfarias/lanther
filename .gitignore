@@ -1,0 +1,4 @@
+debug/
+target/
+# Removed as we are not creating libraries
+Cargo.lock
