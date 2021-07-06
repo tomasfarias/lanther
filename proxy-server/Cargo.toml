@@ -1,0 +1,15 @@
+[package]
+name = "proxy-server"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+actix-web = { version = "3", features = ["openssl"] }
+chrono = { version = "^0.4", features = ["serde"] }
+clap = "^2.33"
+env_logger = "^0.8"
+log = "^0.4"
+serde = "1"
+serde_json = "1"
+url = "2.0"
+uuid = { version = "^0.8", features = ["serde"] }

@@ -28,7 +28,7 @@ async fn get_apikey(
     match result {
         Ok(apikey) => Ok(HttpResponse::Ok().json(json!({
             "status": 200,
-            "sucess": true,
+            "success": true,
             "payload": apikey,
         }))),
         Err(e) => Err(e.into()),
@@ -50,7 +50,7 @@ async fn create_apikey(app_data: web::Data<crate::AppState>) -> Result<HttpRespo
             match apikey {
                 Ok(key) => Ok(HttpResponse::Ok().json(json!({
                     "status": 200,
-                    "sucess": true,
+                    "success": true,
                     "payload": key,
                 }))),
                 Err(e) => Err(e.into()),
@@ -75,7 +75,7 @@ async fn update_apikey(
                     match apikey {
                         Ok(key) => Ok(HttpResponse::Ok().json(json!({
                             "status": 200,
-                            "sucess": true,
+                            "success": true,
                             "payload": key,
                         }))),
                         Err(e) => Err(e.into()),
@@ -114,7 +114,7 @@ async fn delete_apikey(
             } else {
                 Ok(HttpResponse::Ok().json(json!({
                     "status": 200,
-                    "sucess": true,
+                    "success": true,
                     "payload": {
                         "count": res.deleted_count,
                     },

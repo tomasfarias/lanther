@@ -16,6 +16,8 @@ cargo build --release
 
 Once compiled, the binary can be run from anywhere.
 
+Alternatively, `simpleapikeys-server` can be ran as a container, with the included Dockerfile.
+
 ## Usage
 
 `simpleapikeys-server` expects an address where to listen to requests, as well as an address for the MongoDB instance, and a database name:
