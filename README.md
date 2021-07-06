@@ -1,6 +1,6 @@
-# lanther
+# Lanther
 
-Lanther is a sample IPFS server, proxy server, and SimpleAPI keys server built in Rust.
+Lanther is a sample ![IPFS server](/ipfs-server/README.md), ![proxy server](/proxy-server/README.md), and ![SimpleAPI keys server](/simpleapikeys-server/README.md) built in Rust.
 
 ## Requirements
 
@@ -33,8 +33,8 @@ docker ps
 docker-compose up
 ```
 
-*WARNING!* This will start building docker images for all services, which may take a few minutes as we are compiling multiple Rust binaries.
+**WARNING!** This will start building docker images for all services, which may take a few minutes as we are compiling multiple Rust binaries.
 
 ## License
 
-Lanther is licensed under MIT.
+Lanther is licensed under ![MIT](LICENSE).
