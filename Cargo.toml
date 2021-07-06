@@ -2,5 +2,5 @@
 members = [
   "ipfs-server",
   "proxy-server",
-  "simpleapikeys-api",
+  "simpleapikeys-server",
 ]
