@@ -9,3 +9,9 @@ Run the CLI with the address the proxy server will bind to and listen for reques
 ```shell
 proxy-server <listen addr> <listen port> <forward address> <forward port> <authentication address> <authentication port>
 ```
+
+## Middlewares
+
+The proxy-server works with a middleware to check whether a request includes the required Authorization header. This check is done against the server pointed at by the authentication parameters.
+
+Any request that contains no Authorization header, has a API Key marked as disabled, or contains an API Key that does not exist, is rejected. Otherwise, requests are forwarded as normal.
