@@ -67,31 +67,21 @@ async fn update_apikey(
 ) -> Result<HttpResponse, JsonError> {
     let apikey = apikey.into_inner();
     let result = app_data.service.apikey.update(apikey).await;
+    log::debug!("Result: {:?}", result);
     match result {
-        Ok(res) => match res.upserted_id {
-            Some(id) => match id.as_object_id() {
-                Some(object_id) => {
-                    let apikey = app_data.service.apikey.get_by_id(&object_id).await;
-                    match apikey {
-                        Ok(key) => Ok(HttpResponse::Ok().json(json!({
-                            "status": 200,
-                            "success": true,
-                            "payload": key,
-                        }))),
-                        Err(e) => Err(e.into()),
-                    }
-                }
-                None => Err(JsonError {
-                    msg: format!("Key not found: {}", apikey.key),
-                    status: 404,
-                    success: false,
-                }),
-            },
-            None => Err(JsonError {
-                msg: format!("Key not found: {}", apikey.key),
-                status: 404,
-                success: false,
-            }),
+        Ok(res) => {
+            // Result does not return an upserted_id, so we play nice by fetching by key
+            // And returning the changed object
+            let key = apikey.key.to_hyphenated().to_string();
+            let apikey = app_data.service.apikey.get_by_key(&key).await;
+            match apikey {
+                Ok(key) => Ok(HttpResponse::Ok().json(json!({
+                    "status": 200,
+                    "success": true,
+                    "payload": key,
+                }))),
+                Err(e) => Err(e.into()),
+            }
         },
         Err(e) => Err(e.into()),
     }
