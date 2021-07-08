@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
-use actix_web::{delete, get, http::StatusCode, post, put, web, HttpResponse, ResponseError};
+use actix_web::{http::StatusCode, HttpResponse, ResponseError};
 use serde::Serialize;
 
 #[derive(thiserror::Error, Debug)]

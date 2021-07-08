@@ -1,9 +1,6 @@
-use std::fmt::{Display, Formatter, Result as FmtResult};
-
-use super::error::{ApiError, JsonError};
+use super::error::JsonError;
 use super::models;
-use actix_web::{delete, get, http::StatusCode, post, put, web, HttpResponse, ResponseError};
-use serde::Serialize;
+use actix_web::{delete, get, post, put, web, HttpResponse};
 use serde_json::json;
 
 #[get("")]
@@ -69,7 +66,7 @@ async fn update_apikey(
     let result = app_data.service.apikey.update(apikey).await;
     log::debug!("Result: {:?}", result);
     match result {
-        Ok(res) => {
+        Ok(_) => {
             // Result does not return an upserted_id, so we play nice by fetching by key
             // And returning the changed object
             let key = apikey.key.to_hyphenated().to_string();

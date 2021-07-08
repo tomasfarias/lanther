@@ -1,4 +1,4 @@
-use actix_web::{self, guard, web, HttpServer};
+use actix_web::{self, web, HttpServer};
 use clap::{self, Arg};
 use ipfs_api::IpfsClient;
 
