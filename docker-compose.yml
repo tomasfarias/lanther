@@ -1,11 +1,11 @@
 version: "3.9"
 services:
   proxy-server:
-    build: ipfs-server/
-    container_name: "proxy_server"
+    build: proxy-server/
+    container_name: "proxy-server"
     network_mode: "host"
     environment:
-      - RUST_LOG=info
+      - RUST_LOG=debug
   ipfs-server:
     build: ipfs-server/
     container_name: "ipfs-server"
