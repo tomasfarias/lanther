@@ -27,6 +27,7 @@ pub async fn forward(
     new_url.set_path(req.uri().path());
     new_url.set_query(req.uri().query());
 
+    log::debug!("Forwarded request URL: {:?}", new_url);
     // TODO: This forwarded implementation is incomplete as it only handles the inofficial
     // X-Forwarded-For header but not the official Forwarded one.
     let forwarded_req = client
