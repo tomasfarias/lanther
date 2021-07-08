@@ -24,7 +24,7 @@ impl Request {
             false => {
                 let key = doc.get_str("authorization")?;
                 Some(Uuid::parse_str(key).expect("Uuid parse failed"))
-            },   
+            }
         };
         Ok(Request {
             id: doc.get_object_id("_id")?.to_hex(),
@@ -45,7 +45,8 @@ pub struct NewRequest {
 
 impl NewRequest {
     pub fn from_http_request(req: &HttpRequest) -> Result<Self, Error> {
-        let auth_header = req.headers()
+        let auth_header = req
+            .headers()
             .get(header::AUTHORIZATION)
             .map(|h| h.to_str().unwrap());
         let authorization = match auth_header {
@@ -59,7 +60,6 @@ impl NewRequest {
         })
     }
 }
-
 
 #[derive(Deserialize, Debug)]
 pub struct ApiKey {

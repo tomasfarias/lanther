@@ -3,10 +3,10 @@ use clap::{self, Arg};
 use mongodb::{options::ClientOptions, Client};
 use services::ApiKeyService;
 
+mod error;
 mod models;
 mod routes;
 mod services;
-mod error;
 
 struct ServiceContainer {
     apikey: ApiKeyService,

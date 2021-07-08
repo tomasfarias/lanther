@@ -3,15 +3,15 @@ use std::net::ToSocketAddrs;
 use actix_web::client::Client;
 use actix_web::{middleware, web, App, HttpServer};
 use clap::{value_t, Arg};
-use mongodb::{options::ClientOptions, self};
-use url::Url;
+use mongodb::{self, options::ClientOptions};
 use services::RequestService;
+use url::Url;
 
+mod error;
 mod middlewares;
 mod models;
-mod services;
 mod routes;
-mod error;
+mod services;
 
 struct ServiceContainer {
     request: RequestService,
@@ -111,7 +111,7 @@ async fn main() -> std::io::Result<()> {
     let client = mongodb::Client::with_options(client_options).unwrap();
     let db = client.database(db_name);
     let requests = db.collection("requests");
-    
+
     let auth_url = Url::parse(&format!(
         "http://{}",
         (auth_addr.to_owned().as_str(), auth_port)
@@ -120,7 +120,7 @@ async fn main() -> std::io::Result<()> {
             .next()
             .unwrap(),
     ))
-        .unwrap();
+    .unwrap();
 
     let forward_url = Url::parse(&format!(
         "http://{}",
@@ -149,7 +149,7 @@ async fn main() -> std::io::Result<()> {
                     .data(Client::new())
                     .data(forward_url.clone())
                     .wrap(middlewares::Authorized::new(&auth_url))
-                    .default_service(web::route().to(routes::forward))
+                    .default_service(web::route().to(routes::forward)),
             )
     })
     .bind((listen_addr, listen_port))?

@@ -2,6 +2,7 @@ use std::pin::Pin;
 use std::rc::Rc;
 use std::task::{Context, Poll};
 
+use super::models::ApiKeyResponse;
 use actix_service::{Service, Transform};
 use actix_web::client::Client;
 use actix_web::http::{header, StatusCode};
@@ -9,7 +10,6 @@ use actix_web::{dev::ServiceRequest, dev::ServiceResponse, error, Error};
 use futures::future::{ok, Ready};
 use futures::Future;
 use url::Url;
-use super::models::ApiKeyResponse;
 
 pub struct Authorized(Rc<Inner>);
 

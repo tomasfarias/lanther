@@ -1,7 +1,7 @@
-use actix_web::{get, web, Error, HttpRequest, HttpResponse};
 use actix_web::client::Client;
-use url::Url;
+use actix_web::{get, web, Error, HttpRequest, HttpResponse};
 use serde_json::json;
+use url::Url;
 
 use super::error::JsonError;
 use super::models;
@@ -13,7 +13,7 @@ pub async fn forward(
     app_data: web::Data<crate::AppState>,
     client: web::Data<Client>,
 ) -> Result<HttpResponse, Error> {
-    let request = models::NewRequest::from_http_request(&req).unwrap();    
+    let request = models::NewRequest::from_http_request(&req).unwrap();
     let result = app_data.service.request.create(request).await;
 
     // TODO: Figure out a better way to log requests, perhaps with a middelware?
@@ -21,7 +21,7 @@ pub async fn forward(
         Ok(_) => log::info!("Request logged"),
         Err(e) => log::error!("Error logging request: {}", e),
     };
-    
+
     log::info!("Processing request");
     let mut new_url = forward_url.as_ref().clone();
     new_url.set_path(req.uri().path());
@@ -52,7 +52,9 @@ pub async fn forward(
 }
 
 #[get("/requests")]
-pub async fn get_all_requests(app_data: web::Data<crate::AppState>) -> Result<HttpResponse, JsonError> {
+pub async fn get_all_requests(
+    app_data: web::Data<crate::AppState>,
+) -> Result<HttpResponse, JsonError> {
     let result = app_data.service.request.get_all().await;
     match result {
         Ok(requests) => Ok(HttpResponse::Ok().json(json!({

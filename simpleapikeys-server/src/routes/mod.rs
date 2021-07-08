@@ -79,7 +79,7 @@ async fn update_apikey(
                 }))),
                 Err(e) => Err(e.into()),
             }
-        },
+        }
         Err(e) => Err(e.into()),
     }
 }

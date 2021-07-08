@@ -1,7 +1,7 @@
 use chrono::Utc;
 use futures::StreamExt;
 use mongodb::results::InsertOneResult;
-use mongodb::{bson::doc, Collection, bson::Bson};
+use mongodb::{bson::doc, bson::Bson, Collection};
 
 use super::error::ApiError;
 use super::models;
@@ -27,7 +27,7 @@ impl RequestService {
                     "authorization": a.to_hyphenated().to_string(),
                     "created_at": Utc::now(),
                 }
-            },
+            }
             None => {
                 doc! {
                     "method": req.method.clone(),
@@ -35,7 +35,7 @@ impl RequestService {
                     "authorization": Bson::Null,
                     "created_at": Utc::now(),
                 }
-            },
+            }
         };
         let result = self.collection.insert_one(document, None).await?;
         Ok(result)
