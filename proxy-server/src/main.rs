@@ -1,44 +1,31 @@
 use std::net::ToSocketAddrs;
 
 use actix_web::client::Client;
-use actix_web::{middleware, web, App, Error, HttpRequest, HttpResponse, HttpServer};
+use actix_web::{middleware, web, App, HttpServer};
 use clap::{value_t, Arg};
+use mongodb::{options::ClientOptions, self};
 use url::Url;
+use services::RequestService;
 
 mod middlewares;
+mod models;
+mod services;
+mod routes;
+mod error;
 
-async fn forward(
-    req: HttpRequest,
-    body: web::Bytes,
-    forward_url: web::Data<Url>,
-    client: web::Data<Client>,
-) -> Result<HttpResponse, Error> {
-    log::info!("Processing request");
-    let mut new_url = forward_url.as_ref().clone();
-    new_url.set_path(req.uri().path());
-    new_url.set_query(req.uri().query());
+struct ServiceContainer {
+    request: RequestService,
+}
 
-    // TODO: This forwarded implementation is incomplete as it only handles the inofficial
-    // X-Forwarded-For header but not the official Forwarded one.
-    let forwarded_req = client
-        .request_from(new_url.as_str(), req.head())
-        .no_decompress();
-    let forwarded_req = if let Some(addr) = req.head().peer_addr {
-        forwarded_req.header("x-forwarded-for", format!("{}", addr.ip()))
-    } else {
-        forwarded_req
-    };
-
-    let mut res = forwarded_req.send_body(body).await.map_err(Error::from)?;
-
-    let mut client_resp = HttpResponse::build(res.status());
-    // Remove `Connection` as per
-    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Connection#Directives
-    for (header_name, header_value) in res.headers().iter().filter(|(h, _)| *h != "connection") {
-        client_resp.header(header_name.clone(), header_value.clone());
+impl ServiceContainer {
+    fn new(request: RequestService) -> Self {
+        ServiceContainer { request }
     }
+}
 
-    Ok(client_resp.body(res.body().await?))
+// Application state to be shared
+pub struct AppState {
+    service: ServiceContainer,
 }
 
 #[actix_web::main]
@@ -88,6 +75,20 @@ async fn main() -> std::io::Result<()> {
                 .index(6)
                 .required(true),
         )
+        .arg(
+            Arg::with_name("mongo-db-address")
+                .long("mongo-db-address")
+                .help("The address of a Mongo DB instance")
+                .takes_value(true)
+                .required(true),
+        )
+        .arg(
+            Arg::with_name("mongo-db")
+                .long("mongo-db")
+                .help("The name of a Mongo DB")
+                .takes_value(true)
+                .required(true),
+        )
         .get_matches();
 
     let listen_addr = matches.value_of("listen_addr").unwrap();
@@ -99,6 +100,18 @@ async fn main() -> std::io::Result<()> {
     let auth_addr = matches.value_of("auth_addr").unwrap();
     let auth_port = value_t!(matches, "auth_port", u16).unwrap_or_else(|e| e.exit());
 
+    let db_address = matches
+        .value_of("mongo-db-address")
+        .expect("mongo-db-address is a required argument");
+    let db_name = matches
+        .value_of("mongo-db")
+        .expect("mongo-db is a required argument");
+
+    let client_options = ClientOptions::parse(db_address).await.unwrap();
+    let client = mongodb::Client::with_options(client_options).unwrap();
+    let db = client.database(db_name);
+    let requests = db.collection("requests");
+    
     let auth_url = Url::parse(&format!(
         "http://{}",
         (auth_addr.to_owned().as_str(), auth_port)
@@ -124,12 +137,20 @@ async fn main() -> std::io::Result<()> {
     log::info!("Authenticating on: {}:{}", auth_addr, auth_port);
 
     HttpServer::new(move || {
+        let service = ServiceContainer::new(RequestService::new(requests.clone()));
+
         App::new()
-            .data(Client::new())
-            .data(forward_url.clone())
-            .wrap(middlewares::Authorized::new(&auth_url))
             .wrap(middleware::Logger::default())
-            .default_service(web::route().to(forward))
+            .data(AppState { service })
+            .service(routes::get_all_requests)
+            .service(routes::get_requests_by_key)
+            .service(
+                web::scope("/")
+                    .data(Client::new())
+                    .data(forward_url.clone())
+                    .wrap(middlewares::Authorized::new(&auth_url))
+                    .default_service(web::route().to(routes::forward))
+            )
     })
     .bind((listen_addr, listen_port))?
     .system_exit()
